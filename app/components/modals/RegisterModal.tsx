@@ -14,11 +14,13 @@ import { toast } from "react-hot-toast";
 import Button from "../Button";
 import { getIconCode } from "next/dist/compiled/@vercel/og/emoji";
 import { signIn } from "next-auth/react";
+import useLoginModal from "@/app/hooks/useLoginModal";
 
 const RegisterModal = () => {
   //registerModel is state
-  const registerModel = useRegisterModal();
+  const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
+  const loginModal = useLoginModal();
 
   const {
     register,
@@ -37,7 +39,7 @@ const RegisterModal = () => {
     axios
       .post("/api/register", data)
       .then(() => {
-        registerModel.onClose();
+        registerModal.onClose();
       })
       .catch((error) => {
         toast.error("Something went wrong.");
@@ -46,6 +48,11 @@ const RegisterModal = () => {
         setIsLoading(false);
       });
   };
+
+  const toggle = useCallback(() => {
+    registerModal.onClose();
+    loginModal.onOpen();
+  }, [loginModal, registerModal]);
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
@@ -98,7 +105,7 @@ const RegisterModal = () => {
           <div>Already have an account?</div>
           <div
             className="cursor-pointer text-neutral-800 hover:underline"
-            onClick={registerModel.onClose}
+            onClick={toggle}
           >
             Log in
           </div>
@@ -110,10 +117,10 @@ const RegisterModal = () => {
   return (
     <Modal
       disabled={isLoading}
-      isOpen={registerModel.isOpen}
+      isOpen={registerModal.isOpen}
       title="Register"
       actionLabel="Continue"
-      onClose={registerModel.onClose}
+      onClose={registerModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}
       footer={footerContent}
